@@ -11,7 +11,7 @@ import random
 
 # ==================== CẤU HÌNH (GIỮ NGUYÊN) ====================
 MODEL_PATH = r'C:\Users\Admin\Downloads\final_model.pth'
-CLASS_MAPPING_PATH =  r'D:\xla v1\model_output\class_mapping\class_mapping_V1.json'
+CLASS_MAPPING_PATH = r'D:\xla v1\model_output\class_mapping\class_mapping_V1.json'
 DEFAULT_CONFIDENCE_THRESHOLD = 0.5
 EXAMPLE_IMAGE_DIR = "examples"
 # ==============================================================================
@@ -56,10 +56,10 @@ def process_and_display(input_image, confidence_threshold):
     boxes = prediction[0]['boxes'].cpu().numpy()
     labels = prediction[0]['labels'].cpu().numpy()
     scores = prediction[0]['scores'].cpu().numpy()
-    
+
     output_img_np = input_image.copy()
     detections_count = 0
-    detected_objects_list = [] 
+    detected_objects_list = []
 
     for i in range(len(boxes)):
         score = scores[i]
@@ -76,17 +76,16 @@ def process_and_display(input_image, confidence_threshold):
             cv2.putText(output_img_np, label_text, (box[0], box[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
 
     status_message = f"✅ Hoàn tất! Đã phát hiện {detections_count} đối tượng với ngưỡng tin cậy > {confidence_threshold:.2f}"
-    
+
     if detected_objects_list:
         detection_summary = "\n".join(detected_objects_list)
     else:
         detection_summary = "Không có đối tượng nào được phát hiện."
-        
+
     return output_img_np, status_message, detection_summary
 
 
 def show_preview(image):
- 
     if image is None:
         return None, "Vui lòng chọn ảnh để bắt đầu.", ""
     return image, "Ảnh đã sẵn sàng. Nhấn nút để nhận diện.", ""
@@ -117,7 +116,7 @@ with gr.Blocks(theme=gr.themes.Monochrome(), css=css, title="AI Object Detection
         gr.Markdown(
             """
             <h1>Nhận diện biển báo giao thông_Nhóm 11</h1>
-            
+
             """
         )
 
@@ -131,7 +130,8 @@ with gr.Blocks(theme=gr.themes.Monochrome(), css=css, title="AI Object Detection
                         minimum=0.1, maximum=1.0, value=DEFAULT_CONFIDENCE_THRESHOLD, step=0.05,
                         label="Ngưỡng tin cậy (Confidence Threshold)"
                     )
-                status_output = gr.Textbox(label="📊 Trạng thái", interactive=False, lines=2, value="Vui lòng chọn ảnh để bắt đầu.")
+                status_output = gr.Textbox(label="📊 Trạng thái", interactive=False, lines=2,
+                                           value="Vui lòng chọn ảnh để bắt đầu.")
                 predict_button = gr.Button("Bắt đầu Nhận diện", variant="primary", elem_id="predict_button")
 
             with gr.Column(scale=2, min_width=500):
@@ -139,7 +139,8 @@ with gr.Blocks(theme=gr.themes.Monochrome(), css=css, title="AI Object Detection
                 image_output = gr.Image(label="Kết quả (Xem trước)", interactive=False, elem_id="image_output")
                 detection_summary_output = gr.Markdown(label="📝 Danh sách Đối tượng", elem_id="detection_summary")
 
-        example_list = [os.path.join(EXAMPLE_IMAGE_DIR, f) for f in os.listdir(EXAMPLE_IMAGE_DIR)] if os.path.exists(EXAMPLE_IMAGE_DIR) else []
+        example_list = [os.path.join(EXAMPLE_IMAGE_DIR, f) for f in os.listdir(EXAMPLE_IMAGE_DIR)] if os.path.exists(
+            EXAMPLE_IMAGE_DIR) else []
         if example_list:
             gr.Examples(
                 examples=example_list,
@@ -150,16 +151,12 @@ with gr.Blocks(theme=gr.themes.Monochrome(), css=css, title="AI Object Detection
     with gr.Column(elem_classes="footer"):
         gr.Markdown("<p>Được phát triển bởi các chiến thần xử lí ảnh mạnh nhất thế giới</p>")
 
-    
-
-    
     image_input.change(
         fn=show_preview,
         inputs=image_input,
         outputs=[image_output, status_output, detection_summary_output]
     )
-    
-    
+
     predict_button.click(
         fn=process_and_display,
         inputs=[image_input, confidence_slider],
